@@ -2,6 +2,7 @@
 # John Roy Daradal 
 
 # SolutionA: 2156
+# SolutionB: 66909
 
 from utils import *
 
@@ -17,7 +18,16 @@ class Game:
         for r,g,b in self.draws:
             if r > 12 or g > 13 or b > 14:
                 return False 
-        return True
+        return True 
+    
+    @property 
+    def power(self) -> int:
+        maxR,maxG,maxB = 0,0,0 
+        for r,g,b in self.draws:
+            maxR = max(maxR,r)
+            maxG = max(maxG,g)
+            maxB = max(maxB,b)
+        return maxR*maxG*maxB
     
 
 def input02(full: bool) -> list[Game]:
@@ -29,6 +39,13 @@ def day02A():
     for game in input02(full):
         if game.isValid:
             total += game.id 
+    print(total)
+
+def day02B():
+    full = True 
+    total = 0 
+    for game in input02(full):
+        total += game.power 
     print(total)
 
 def parseLine(line: str) -> Game:
@@ -54,3 +71,4 @@ def parseDraw(line: str) -> draw:
 
 if __name__ == '__main__':
     day02A()
+    day02B()
