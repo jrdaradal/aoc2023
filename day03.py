@@ -2,6 +2,7 @@
 # John Roy Daradal 
 
 # SolutionA: 553079
+# SolutionB: 84363105
 
 import re
 from utils import *
@@ -16,6 +17,13 @@ def day03A():
     grid = input03(full)
     symbols = findSymbols(grid) 
     total = sum(findValidNumbers(grid, symbols))
+    print(total) 
+
+def day03B():
+    full = True 
+    grid = input03(full)
+    gears = findGears(grid)
+    total = sum(findGearRatios(grid, gears))
     print(total)
 
 NON_SYMBOL = '0123456789.'
@@ -38,10 +46,42 @@ def findValidNumbers(grid: list[str], symbols:set[coords]) -> list[int]:
                 numbers.append(int(line[start:end]))
     return numbers
 
+def findGears(grid: list[str]) -> set[coords]:
+    gears: list[coords] = []
+    for row,line in enumerate(grid):
+        for col,char in enumerate(line):
+            if char == '*':
+                gears.append((row,col))
+    return set(gears)
+
+def findGearRatios(grid: list[str], gears: set[coords]) -> list[int]:
+    bounds: coords = (len(grid),len(grid[0]))
+    adjacent: dict[coords,list[int]] = {}
+    for row,line in enumerate(grid):
+        for m in re.finditer(r'[0-9]+', line):
+            start,end = m.start(), m.end() 
+            r = (row,start,end)
+            number = int(line[start:end])
+            for c in getAdjacentSymbols(r, gears, bounds):
+                adjacent.setdefault(c, [])
+                adjacent[c].append(number)
+
+    numbers: list[int] = []
+    for c in adjacent:
+        if len(adjacent[c]) == 2:
+            a,b = adjacent[c]
+            numbers.append(a*b)
+    return numbers 
+
 def hasAdjacentSymbol(r: rowrange, symbols: set[coords], bounds: coords) -> bool:
     adjacent = getAdjacent(r, bounds)
     common = symbols.intersection(set(adjacent))
     return len(common) > 0
+
+def getAdjacentSymbols(r: rowrange, symbols: set[coords], bounds: coords) -> list[coords]:
+    adjacent = getAdjacent(r, bounds)
+    common = symbols.intersection(set(adjacent))
+    return sorted(common)
 
 def getAdjacent(r: rowrange, bounds: coords) -> list[coords]:
     y,x1,x2  = r 
@@ -66,4 +106,5 @@ def getAdjacent(r: rowrange, bounds: coords) -> list[coords]:
     return adjacent
 
 if __name__ == '__main__':
-    day03A()
+    # day03A()
+    day03B()
