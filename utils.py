@@ -1,3 +1,5 @@
+coords = tuple[int,int]
+
 def getPath(day: int, full: bool) -> str:
     suffix = 'test' if full else 'sample'
     return 'data/%.2d_%s.txt' % (day, suffix)
