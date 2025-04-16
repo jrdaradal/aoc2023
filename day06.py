@@ -2,6 +2,7 @@
 # John Roy Daradal 
 
 # SolutionA: 219849
+# SolutionB: 29432455
 
 from utils import *
 
@@ -16,9 +17,17 @@ def day06A():
     times, bests = input06(full)
     total = 1
     for i,limit in enumerate(times):
-        breakers = [x for x in computeOutcomes(limit) if x > bests[i]]
+        breakers = [True for x in computeOutcomes(limit) if x > bests[i]]
         total *= len(breakers)
     print(total)
+
+def day06B():
+    full = True 
+    times, bests = input06(full)
+    time = int(''.join(str(x) for x in times))
+    best = int(''.join(str(x) for x in bests))
+    breakers = [True for x in computeOutcomes(time) if x > best]
+    print(len(breakers))
 
 def computeOutcomes(limit: int) -> list[int]:
     outcomes = []
@@ -28,4 +37,5 @@ def computeOutcomes(limit: int) -> list[int]:
     return outcomes 
 
 if __name__ == '__main__':
-    day06A()
+    # day06A()
+    day06B()
