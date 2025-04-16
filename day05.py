@@ -1,18 +1,34 @@
-# 2023 Advent of Code Day 04 Solution
+# 2023 Advent of Code Day 05 Solution
 # John Roy Daradal 
 
 # SolutionA: 403695602
+# SolutionB: 219529182
 
 from utils import * 
 
 chain = ['seed','soil','fertilizer','water','light','temperature','humidity','location']
 triple = tuple[int,int,int]
+rangeMatch = tuple[int,int] | None
 
 
 class Config: 
     def __init__(self):
         self.seeds: list[int] = []
         self.maps: dict[tuple[str,str], list[triple]] = {}
+
+    @property 
+    def seedRanges(self) -> list[tuple[int,int]]:
+        s = self.seeds 
+        return [(s[i],s[i]+s[i+1]-1) for i in range(0,len(s),2)]
+
+    @property 
+    def mapRanges(self) -> dict[tuple[str,str],list[triple]]:
+        m = {}
+        for key, items in self.maps.items():
+            m[key] = []
+            for src,dst,count in items:
+                m[key].append((src,src+count-1,dst-src))
+        return m
 
 def input05(full: bool) -> Config:
     cfg = Config()
@@ -38,6 +54,12 @@ def day05A():
     locations = applyMapChain(cfg)
     print(min(locations))
 
+def day05B():
+    full = True 
+    cfg = input05(full)
+    locations = applyMapRangeChain(cfg)
+    print(min(locations))
+
 def applyMapChain(cfg: Config) -> list[int]:
     current = cfg.seeds 
     for i in range(len(chain)-1):
@@ -56,5 +78,46 @@ def translate(numbers: list[int], t: list[triple]) -> list[int]:
         result.append(y)
     return result
 
+def applyMapRangeChain(cfg: Config) -> list[int]:
+    currRanges = cfg.seedRanges 
+    rangeMap = cfg.mapRanges 
+    for i in range(len(chain)-1):
+        key = (chain[i],chain[i+1])
+        nextRanges = []
+        while len(currRanges) > 0:
+            first, last = currRanges.pop(0)
+            for rule in rangeMap[key]:
+                delta = rule[2]
+                if isInside(rule, first, last):
+                    nextRanges.append((first+delta, last+delta))
+                    break 
+                match, extra = findIntersection(rule, first, last)
+                if match != None:
+                    first, last = match 
+                    nextRanges.append((first+delta, last+delta))
+                    currRanges.append(extra)
+                    break
+            else:
+                nextRanges.append((first, last))
+        currRanges = nextRanges
+    return [x[0] for x in currRanges]
+
+def isInside(rule: triple, first: int, last: int) -> bool:
+    start, end, _ = rule 
+    return start <= first and first <= last and last <= end
+
+def findIntersection(rule: triple, first: int, last: int) -> tuple[rangeMatch, rangeMatch]:
+    start, end, _ = rule 
+    if start <= first and first <= end:
+        match = (first,end)
+        extra = (end+1,last)
+    elif start <= last and last <= end:
+        match = (start,last)
+        extra = (first,start-1)
+    else:
+        match, extra = None, None 
+    return match, extra
+
 if __name__ == '__main__':
-    day05A()
+    # day05A()
+    day05B()
